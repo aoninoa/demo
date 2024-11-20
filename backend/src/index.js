@@ -8,7 +8,6 @@ import config from "./config/config.js";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-// constants
 const { host, port, jwtTokenSecret } = config;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,7 +21,6 @@ const generateToken = (user) => {
   return jwt.sign(user, jwtTokenSecret, { expiresIn: "1800s" });
 };
 
-// middleware to handle authetication
 const authenticateToken = (req, res, next) => {
   console.log(req.headers);
   const authHeader = req.headers.authorization;
@@ -47,7 +45,6 @@ const authenticateToken = (req, res, next) => {
 
 const app = express();
 
-// attach middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
