@@ -1,9 +1,24 @@
 const users = [
-  { userid: "w0000001", passwd: "123", username: "山田" },
-  { userid: "w0000002", passwd: "456", username: "田中" },
-  { userid: "w0000003", passwd: "789", username: "佐藤" },
+  { 
+    userID: "w0000001", 
+    password: "123", 
+    userName: "田中 太郎", 
+    prefecture: "岡山県" 
+  },
+  { 
+    userID: "w0000002", 
+    password: "456", 
+    userName: "佐藤 洋子", 
+    prefecture: "広島県" 
+  },
+  { 
+    userID: "w0000003", 
+    password: "789", 
+    userName: "鈴木 実", 
+    prefecture: "山口県" 
+  }
 ];
 
-export const findOne = (userid) => {
-  return structuredClone(users.filter((user) => user.userid === userid)[0]);
+export const findOne = (userID) => {
+  return structuredClone(users.filter(user => user.userID === userID[0]));
 };
