@@ -62,15 +62,15 @@ app.get("/secret", authenticateToken, (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const { userID, passwd } = req.body;
+  const { userID, password } = req.body;
   const user = findOne(userID);
   if (!user) {
     return res.status(401).json({ success: false, error: `${userID} is not found` });
   }
-  if (user.passwd !== passwd) {
+  if (user.password !== password) {
     return res.status(401).json({ success: false, error: "Your password is incorrect" });
   }
-  user.passwd = undefined;
+  user.password = undefined;
   const token = generateToken(user);
   res.json({ success: true, token });
 });

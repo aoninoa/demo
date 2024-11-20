@@ -20,5 +20,5 @@ const users = [
 ];
 
 export const findOne = (userID) => {
-  return structuredClone(users.filter(user => user.userID === userID[0]));
+  return structuredClone(users.filter(user => user.userID === userID)[0]);
 };
