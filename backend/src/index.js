@@ -2,7 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 
-import { findOne } from "./mockData/users.js";
+import { findOne } from "./data/users.js";
 import config from "./config/config.js";
 
 import { fileURLToPath } from 'url';
