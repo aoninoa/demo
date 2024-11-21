@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 
 import { findOne } from "./data/users.js";
 import config from "./config/config.js";
+import passport from "./config/passport.js";
 
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -45,7 +46,7 @@ app.use(cors());
 app.use(cookieParser());
 
 app.get("/", (_req, res) => {
-  res.sendFile(abspath("../public/index.html"));
+  res.redirect("/login");
 });
 
 app.get("/protected", authenticateToken, (req, res) => {
@@ -65,26 +66,24 @@ app.get("/logout", authenticateToken, (req, res) => {
   }
 });
 
+app.get("/login", (req, res) => {
+  res.sendFile(abspath("../public/index.html"));
+});
+
 app.post("/login", (req, res) => {
-  const { userID, password } = req.body;
-  if (!(userID && password) ) {
-    return res.status(400).json({ success: false, error: "User ID or Password or both are invalid" });
-  }
-  const user = findOne(userID);
-  if (!user) {
-    return res.status(401).json({ success: false, error: `${userID} is not found` });
-  }
-  if (user.password !== password) {
-    return res.status(401).json({ success: false, error: "Your password is incorrect" });
-  }
-  user.password = undefined;
-  const token = generateToken(user);
-  res.
-    cookie("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  })
-  .json({ success: true, token });
+  passport.authenticate("local", { session: false }, (error, user) => {
+    if (error) {
+      return res.status(400).json({ success: false, error });
+    }
+    if (!user) {
+      return res.status(401).json({ success: false, error: "Authetication failed" });
+    }
+    delete user.password;
+    const token = generateToken(user);
+    return res
+      .cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" })
+      .json({ success: true, token });
+  })(req, res);
 });
 
 app.listen(port, () => {
