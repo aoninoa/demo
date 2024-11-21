@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import { findOne } from "./data/users.js";
 import config from "./config/config.js";
 import passport from "./config/passport.js";
 
@@ -24,18 +23,7 @@ const generateToken = (user) => {
 };
 
 const authenticateToken = (req, res, next) => {
-  if (req.cookies.token) {
-    const token = req.cookies.token;
-    jwt.verify(token, jwtTokenSecret, (err, user) => {
-      if (err) {
-        return res.status(400).json({ success: false, error: err.message });
-      }
-      req.user = user;
-      return next();
-    });
-  } else {
-    return res.status(401).json({ success: false, error: "You are not authenticated" });
-  }
+  
 };
 
 const app = express();
@@ -45,35 +33,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
 
-app.get("/", (_req, res) => {
-  res.redirect("/login");
+app.get("/", passport.authenticate("jwt", { session: false, successRedirect: "/protected", failureRedirect: "/login" }), (req, res) => {
+  // if (req.user) {
+  //   res.redirect("/protected");
+  // } else {
+  //   res.redirect("/login");
+  // }
 });
 
-app.get("/protected", authenticateToken, (req, res) => {
-  if (req.user) {
-    res.json(req.user);
-  } else {
-    res.status(401).json({ success: false, error: "You are not authenticated" });
-  }
+app.get("/protected", passport.authenticate("jwt", { session: false }), (req, res) => {
+  res.json(req.user);
 });
 
-app.get("/logout", authenticateToken, (req, res) => {
-  if (req.cookies.token) {
-    res.clearCookie("token");
-    res.json({ success: true });
-  } else {
-    res.json({ success: false, error: "Something goes wrong" });
-  }
+app.get("/logout", passport.authenticate("jwt", { session: false }), (req, res) => {
+  res.clearCookie("token");
+  res.json({ success: true });
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", (_req, res) => {
   res.sendFile(abspath("../public/index.html"));
 });
 
 app.post("/login", (req, res) => {
   passport.authenticate("local", { session: false }, (error, user) => {
     if (error) {
-      return res.status(400).json({ success: false, error });
+      return res.status(400).json({ success: false, error: error.message });
     }
     if (!user) {
       return res.status(401).json({ success: false, error: "Authetication failed" });

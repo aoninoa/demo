@@ -1,7 +1,9 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as JwtStrategy } from "passport-jwt";
 
 import { findOne } from "../data/users.js";
+import config from "../config/config.js";
 
 const localStrategy = new LocalStrategy(
   {
@@ -10,13 +12,12 @@ const localStrategy = new LocalStrategy(
   },
   async (userID, password, done) => {
     try {
-      console.log(userID, password);
       const user = await findOne(userID);
       if (!user) {
-        return done(null, false);
+        return done(new Error(`${userID} is not found`), false);
       }
       if (user.password !== password) {
-        return done(null, false);
+        return done(new Error("Provided password is incorrect"), false);
       }
       return done(null, user);
     } catch (err) {
@@ -25,6 +26,24 @@ const localStrategy = new LocalStrategy(
   },
 );
 
+const extractCookie = (req) => {
+  if (req && req.cookies) {
+    return req.cookies.token;
+  }
+  return null;
+};
+
+const jwtStrategy = new JwtStrategy(
+  {
+    jwtFromRequest: extractCookie,
+    secretOrKey: config.jwtTokenSecret,
+  },
+  (user, done) => {
+    return done(null, user);
+  }
+);
+
 passport.use(localStrategy);
+passport.use(jwtStrategy);
 
 export default passport;
