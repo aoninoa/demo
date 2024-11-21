@@ -19,6 +19,6 @@ const users = [
   }
 ];
 
-export const findOne = (userID) => {
+export const findOne = async (userID) => {
   return structuredClone(users.filter(user => user.userID === userID)[0]);
 };
