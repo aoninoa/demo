@@ -33,24 +33,7 @@ const authenticateToken = (req, res, next) => {
       return next();
     });
   } else {
-    return res.status(401).json({ success: false, error: "Authorization header is not set" });
-    // const authHeader = req.headers.authorization;
-    // if (authHeader === undefined) {
-    //   return res.status(401).json({ success: false, error: "Authorization header is not set" });
-    // }
-    // /*
-    //  * Authorization header looks like: Bearer <token>
-    //  * so split header with white space and take the second one
-    //  */
-    // const token = authHeader.split(" ")[1];
-
-    // jwt.verify(token, jwtTokenSecret, (err, user) => {
-    //   if (err) {
-    //     return res.status(400).json({ error: err.message });
-    //   }
-    //   req.user = user;
-    //   return next();
-    // });
+    return res.status(401).json({ success: false, error: "You are not authenticated" });
   }
 };
 
@@ -70,6 +53,15 @@ app.get("/protected", authenticateToken, (req, res) => {
     res.json(req.user);
   } else {
     res.status(401).json({ success: false, error: "You are not authenticated" });
+  }
+});
+
+app.get("/logout", authenticateToken, (req, res) => {
+  if (req.cookies.token) {
+    res.clearCookie("token");
+    res.json({ success: true });
+  } else {
+    res.json({ success: false, error: "Something goes wrong" });
   }
 });
 
